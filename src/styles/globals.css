@@ -8,7 +8,6 @@
   /* accent hue/saturation/lightness token (H S% L%) */
   --accent: 260 100% 70%;
 }
-
 html, body, #__next {
   height: 100%;
 }
@@ -17,11 +16,88 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* slightly lighter music-friendly blue gradient */
+  background: radial-gradient(ellipse at 10% 10%, rgba(255,255,255,0.02), transparent 10%),
+    linear-gradient(180deg, #0e4c66 0%, #083246 100%);
+  background-attachment: fixed;
+  color: #eef8ff;
 }
-
-/* small container utility */
 .container {
   max-width: 1100px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Animated musical-note background (site-wide) */
+.music-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.music-note {
+  position: absolute;
+  bottom: -12vh;
+  color: rgba(255, 255, 255, 0.10);
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation-name: noteFloat;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes noteFloat {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0) scale(1);
+    opacity: 0;
+  }
+  10% { opacity: 0.9; }
+  100% {
+    transform: translateY(-140vh) translateX(60px) rotate(360deg) scale(1.05);
+    opacity: 0;
+  }
+}
+
+.note-sm { font-size: 18px; }
+.note-md { font-size: 28px; }
+.note-lg { font-size: 42px; }
+.note-ghost { color: rgba(255,255,255,0.06); }
+
+/* ensure content is above animated background */
+.app-content { position: relative; z-index: 10; }
+
+/* Universal page layout styles so individual pages don't need per-page classes */
+main {
+  /* full viewport height and centered column layout by default */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: transparent; /* let the site-wide background show through */
+  color: var(--text, #eef8ff);
+}
+
+/* Make content children stack above animated background by default */
+main > .container,
+.app-content > .container {
+  position: relative;
+  z-index: 10;
+}
+
+/* Default card style used across pages */
+.card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* utility for slightly brighter panels */
+.panel-bright {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
 }
