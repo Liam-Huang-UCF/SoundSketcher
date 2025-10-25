@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import Image from "next/image";
 
 export default function Home() {
-  const [themeNote] = useState<string>(() => {
-    // small deterministic visual flourish (no audio processing)
-    return "♪";
-  });
 
   return (
     <main>
@@ -15,8 +11,8 @@ export default function Home() {
         <header className="mx-auto max-w-4xl text-center">
           <h1 className="mb-4 text-5xl font-extrabold tracking-tight sm:text-6xl">
             SoundSketch
-            <span className="ml-3 text-4xl text-[hsl(260,100%,70%)]">
-              {themeNote}
+            <span className="ml-3 inline-block align-middle">
+              <Image src="/logo.svg" alt="SoundSketch logo" width={48} height={48} priority={false} />
             </span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-200">
