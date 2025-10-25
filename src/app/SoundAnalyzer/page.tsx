@@ -3,10 +3,19 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 
+type AnalysisResult = {
+  tempo: number;
+  estimatedBars: number;
+  instruments: string[];
+  key: string;
+  timeSignature: string;
+  notableRhythms: string[];
+};
+
 export default function SoundAnalyzerPage() {
   const [fileName, setFileName] = useState<string | null>(null);
-  const [analysis, setAnalysis] = useState<Record<string, any> | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleFile = async (f: File | null) => {
