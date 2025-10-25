@@ -5,6 +5,7 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import MusicBackground from "./_components/MusicBackground";
+import Navbar from "./_components/Navbar";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -25,7 +26,10 @@ export default function RootLayout({
       <body>
         <MusicBackground />
         <TRPCReactProvider>
-          <div className="app-content">{children}</div>
+          <div className="app-content">
+            <Navbar />
+            {children}
+          </div>
         </TRPCReactProvider>
       </body>
     </html>
