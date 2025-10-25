@@ -1,53 +1,91 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
-import { LatestPost } from "~/app/_components/post";
-import { api, HydrateClient } from "~/trpc/server";
-
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-
-  void api.post.getLatest.prefetch();
+export default function Home() {
+  const [themeNote] = useState<string>(() => {
+    // small deterministic visual flourish (no audio processing)
+    return "♪";
+  });
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0f172a] via-[#1f2937] to-[#071128] text-white">
+      <div className="container px-6 py-16">
+        <header className="mx-auto max-w-4xl text-center">
+          <h1 className="mb-4 text-5xl font-extrabold tracking-tight sm:text-6xl">
+            SoundSketch
+            <span className="ml-3 text-4xl text-[hsl(260,100%,70%)]">
+              {themeNote}
+            </span>
           </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
+          <p className="mx-auto max-w-2xl text-lg text-slate-300">
+            Upload audio or MIDI and instantly preview sheet music. Analyze
+            rhythms, instruments, and tempo with an AI-powered breakdown — UI
+            only (no API wired).
+          </p>
+        </header>
 
-          <LatestPost />
-        </div>
-      </main>
-    </HydrateClient>
+        <section className="mt-12 grid gap-8 sm:grid-cols-2">
+          <Link
+            href="/SheetSketcher"
+            className="group flex flex-col gap-4 rounded-2xl border border-slate-700 bg-gradient-to-br from-white/3 to-white/2 p-6 transition hover:scale-[1.01]"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">Sheet Sketcher</h2>
+                <p className="mt-1 text-sm text-slate-300">
+                  Upload MIDI or WAV to convert into readable sheet music.
+                </p>
+              </div>
+              <div className="rounded-full bg-[hsl(260,100%,70%)]/20 p-3 text-[hsl(260,100%,70%)]">
+                ♬
+              </div>
+            </div>
+            <p className="text-sm text-slate-400">
+              Drag & drop a file, then preview the generated score and
+              download a printable PDF (placeholder UI).
+            </p>
+            <div className="mt-2 text-xs text-slate-500">Go →</div>
+          </Link>
+
+          <Link
+            href="/SoundAnalyzer"
+            className="group flex flex-col gap-4 rounded-2xl border border-slate-700 bg-gradient-to-br from-white/3 to-white/2 p-6 transition hover:scale-[1.01]"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">Sound Analyzer</h2>
+                <p className="mt-1 text-sm text-slate-300">
+                  Upload audio clips to get a breakdown of tempo, instruments,
+                  and rhythms.
+                </p>
+              </div>
+              <div className="rounded-full bg-[hsl(200,100%,60%)]/20 p-3 text-[hsl(200,100%,60%)]">
+                ♪
+              </div>
+            </div>
+            <p className="text-sm text-slate-400">
+              Visual waveform, tempo estimate, and instrument guesses (mock
+              UI).
+            </p>
+            <div className="mt-2 text-xs text-slate-500">Explore →</div>
+          </Link>
+        </section>
+
+        <section className="mt-12 mx-auto max-w-3xl rounded-2xl bg-white/3 p-6 text-slate-200">
+          <h3 className="mb-3 text-xl font-semibold">How it works (UI-only)</h3>
+          <ol className="ml-4 list-decimal text-sm text-slate-300">
+            <li className="mb-1">Upload a MIDI or audio file.</li>
+            <li className="mb-1">
+              The app will prepare the file and send it to an API (placeholder).
+            </li>
+            <li className="mb-1">
+              You receive sheet music or an analysis report (mock preview here).
+            </li>
+          </ol>
+        </section>
+      </div>
+    </main>
   );
 }
