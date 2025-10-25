@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
-@theme {
+:root {
+  /* font stack provided from layout Google font variable */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-}
 
-:root {
+  /* accent hue/saturation/lightness token (H S% L%) */
   --accent: 260 100% 70%;
 }
 
