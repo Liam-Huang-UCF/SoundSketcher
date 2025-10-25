@@ -105,7 +105,7 @@ export default function SheetSketcherPage() {
                     <div>
                       <div className="font-medium">{f.name}</div>
                       <div className="text-xs text-slate-300">
-                        {(f.size / 1024).toFixed(1)} KB • {f.type || "unknown"}
+                        {(f.size / 1024).toFixed(1)} KB • {f.type ?? "unknown"}
                       </div>
                     </div>
                     <div className="flex gap-2">

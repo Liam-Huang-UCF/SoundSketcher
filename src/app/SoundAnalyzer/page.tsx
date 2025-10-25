@@ -1,123 +1,125 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import Link from "next/link";
-
-type AnalysisResult = {
-  tempo: number;
-  estimatedBars: number;
-  instruments: string[];
-  key: string;
-  timeSignature: string;
-  notableRhythms: string[];
-};
+import React, { useCallback, useState } from "react";
+import Header from "./components/Header";
+import InputArea from "./components/InputArea";
+import AnalysisDisplay from "./components/AnalysisDisplay";
+import LoadingSpinner from "./components/LoadingSpinner";
+import VisualPreview from "./components/VisualPreview";
+import type { AnalysisResult } from "./types";
 
 export default function SoundAnalyzerPage() {
-  const [fileName, setFileName] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-  const handleFile = async (f: File | null) => {
-    if (!f) return;
-    setFileName(f.name);
-    setLoading(true);
+  const handleAnalyze = useCallback(async (inputType: "file" | "link", value: File | string) => {
+    // Validate
+    if ((typeof value === "string" && !value.trim()) || !value) {
+      setError("Please provide a file or a link to analyze.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
     setAnalysis(null);
-    // simulate analysis
-    await new Promise((r) => setTimeout(r, 1000));
-    setAnalysis({
-      tempo: 120,
-      estimatedBars: 32,
-      instruments: ["Piano", "Violin"],
-      key: "C Major",
-      timeSignature: "4/4",
-      notableRhythms: ["syncopation", "triplets"],
-    });
-    setLoading(false);
-  };
+
+    let analysisValue: string;
+    if (inputType === "file" && value instanceof File) {
+      setSelectedFile(value);
+      setVideoUrl(null);
+      analysisValue = value.name;
+    } else {
+      setSelectedFile(null);
+      // If a YouTube link was provided, convert to an embed URL for preview
+      const link = typeof value === 'string' ? value : '';
+      analysisValue = link;
+      const re = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i;
+      const match = re.exec(link);
+      if (match?.[1]) {
+        const id = match[1];
+        setVideoUrl(`https://www.youtube.com/embed/${id}`);
+      } else {
+        setVideoUrl(null);
+      }
+    }
+
+    try {
+  let result: unknown;
+      if (inputType === "file" && value instanceof File) {
+        // Upload file to server route that accepts multipart/form-data
+        const fd = new FormData();
+        fd.append("file", value);
+        const res = await fetch("/api/analyze-file", { method: "POST", body: fd });
+        if (!res.ok) throw new Error(await res.text());
+        result = await res.json();
+      } else {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inputType, value: analysisValue }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        result = await res.json();
+      }
+      // Basic runtime validation before updating state
+      if (isAnalysisResult(result)) {
+        setAnalysis(result);
+      } else {
+        console.error('Unexpected analysis shape', result);
+        setError('Received unexpected analysis response');
+      }
+    } catch (e) {
+      // Network or parsing error
+      console.error(e);
+      setError("Failed to analyze the music. Please check your input and try again.");
+      setSelectedFile(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  function isAnalysisResult(obj: unknown): obj is AnalysisResult {
+    if (typeof obj !== 'object' || obj === null) return false;
+    const o = obj as Record<string, unknown>;
+    return typeof o.songTitle === 'string' && typeof o.artist === 'string';
+  }
 
   return (
     <main>
-      <div className="container mx-auto px-6 py-12">
-        <nav className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Sound Analyzer</h1>
-          <Link href="/" className="text-sm text-slate-300 hover:underline">
-            ← Home
-          </Link>
-        </nav>
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <Header />
 
-        <section className="grid gap-8 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <div className="rounded-xl bg-white/3 p-6">
-              <h3 className="mb-4 text-lg font-semibold">Upload audio</h3>
-              <p className="mb-4 text-sm text-slate-300">
-                Drop an audio file or select from your device. This UI simulates
-                an AI analysis and displays a friendly summary.
-              </p>
-              <div className="flex items-center gap-3">
-                <label className="cursor-pointer rounded-md bg-[hsl(200,100%,60%)]/20 px-4 py-2 text-sm text-[hsl(200,100%,60%)] hover:bg-[hsl(200,100%,60%)]/30">
-                  Select file
-                  <input
-                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-                    className="hidden"
-                    type="file"
-                    accept="audio/*"
-                  />
-                </label>
+        <section className="grid gap-8 md:grid-cols-2 min-h-[calc(100vh-6rem)]">
+          {/* Left: input + visual preview */}
+          <div className="md:col-span-1 flex flex-col gap-6">
+            <div>
+              <InputArea onAnalyze={handleAnalyze} disabled={isLoading} onFile={(f) => { /* keep compatibility */ setSelectedFile(f); }} />
 
-                <div className="text-sm text-slate-300">or drag & drop here</div>
-              </div>
-
-              <div className="mt-6">
-                {fileName && (
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-md bg-white/5 px-4 py-2">{fileName}</div>
-                    <audio ref={audioRef} controls className="w-full" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-xl bg-white/3 p-6">
-              <h4 className="mb-2 text-sm font-semibold">Analysis output</h4>
-              {loading && <div className="text-sm text-slate-300">Analyzing…</div>}
-
-              {analysis && (
-                <div className="grid gap-2 text-sm text-slate-200">
-                  <div>Tempo: {analysis.tempo} BPM</div>
-                  <div>Key: {analysis.key}</div>
-                  <div>Time signature: {analysis.timeSignature}</div>
-                  <div>Estimated bars: {analysis.estimatedBars}</div>
-                  <div>Instruments: {analysis.instruments.join(", ")}</div>
-                  <div>Notable rhythms: {analysis.notableRhythms.join(", ")}</div>
+              {error && (
+                <div className="mt-6 bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg" role="alert">
+                  <p>{error}</p>
                 </div>
               )}
+            </div>
 
-              {!loading && !analysis && (
-                <div className="text-sm text-slate-400">No analysis yet.</div>
-              )}
+            <div>
+              <VisualPreview file={selectedFile} videoUrl={videoUrl} shouldPlay={!!analysis} />
             </div>
           </div>
 
-          <aside className="rounded-xl bg-white/3 p-6">
-            <h4 className="mb-3 text-sm font-semibold">Visual preview</h4>
-            <div className="h-48 rounded-md bg-gradient-to-b from-white/5 to-white/3 p-3">
-              {/* Simple waveform placeholder */}
-              <svg viewBox="0 0 600 100" className="w-full h-full">
-                <polyline
-                  points="0,50 30,40 60,60 90,30 120,70 150,45 180,55 210,35 240,65 270,50 300,50 330,60 360,40 390,70 420,30 450,80 480,50 510,60 540,35 570,55 600,50"
-                  fill="none"
-                  stroke="#fff"
-                  strokeOpacity={0.8}
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
+          {/* Right: analysis output (sticky) */}
+          <aside className="md:col-span-1">
+            <div className="sticky top-20">
+              {isLoading && <LoadingSpinner />}
 
-            <div className="mt-4 text-sm text-slate-300">
-              This pane shows a mock waveform and quick stats. Real analysis would
-              display spectrograms, onset detection, and instrument separation.
+              {analysis && !isLoading && <AnalysisDisplay analysis={analysis} />}
+
+              {!analysis && !isLoading && !error && (
+                <div className="text-sm text-slate-400">Upload a file or paste a link to begin analysis.</div>
+              )}
             </div>
           </aside>
         </section>
