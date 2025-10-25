@@ -23,7 +23,6 @@ try {
 } catch (err) {
 	// Fail silently — mounting is optional and only used in non-Next dev setups.
 	// Keep export below so the module remains usable programmatically.
-	// eslint-disable-next-line no-console
 	console.warn("SoundAnalyzer standalone mount failed:", err);
 }
 

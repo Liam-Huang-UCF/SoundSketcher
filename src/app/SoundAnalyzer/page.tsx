@@ -6,7 +6,6 @@ import InputArea from "./components/InputArea";
 import AnalysisDisplay from "./components/AnalysisDisplay";
 import LoadingSpinner from "./components/LoadingSpinner";
 import VisualPreview from "./components/VisualPreview";
-import { analyzeMusic } from "./services/geminiService";
 import type { AnalysisResult } from "./types";
 
 export default function SoundAnalyzerPage() {
@@ -35,10 +34,11 @@ export default function SoundAnalyzerPage() {
     } else {
       setSelectedFile(null);
       // If a YouTube link was provided, convert to an embed URL for preview
-      const link = String(value);
+      const link = typeof value === 'string' ? value : '';
       analysisValue = link;
-      const match = link.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
-      if (match) {
+      const re = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i;
+      const match = re.exec(link);
+      if (match?.[1]) {
         const id = match[1];
         setVideoUrl(`https://www.youtube.com/embed/${id}`);
       } else {
@@ -47,7 +47,7 @@ export default function SoundAnalyzerPage() {
     }
 
     try {
-      let result: any;
+  let result: unknown;
       if (inputType === "file" && value instanceof File) {
         // Upload file to server route that accepts multipart/form-data
         const fd = new FormData();
@@ -64,10 +64,15 @@ export default function SoundAnalyzerPage() {
         if (!res.ok) throw new Error(await res.text());
         result = await res.json();
       }
-      setAnalysis(result);
+      // Basic runtime validation before updating state
+      if (isAnalysisResult(result)) {
+        setAnalysis(result);
+      } else {
+        console.error('Unexpected analysis shape', result);
+        setError('Received unexpected analysis response');
+      }
     } catch (e) {
       // Network or parsing error
-      // eslint-disable-next-line no-console
       console.error(e);
       setError("Failed to analyze the music. Please check your input and try again.");
       setSelectedFile(null);
@@ -76,14 +81,20 @@ export default function SoundAnalyzerPage() {
     }
   }, []);
 
+  function isAnalysisResult(obj: unknown): obj is AnalysisResult {
+    if (typeof obj !== 'object' || obj === null) return false;
+    const o = obj as Record<string, unknown>;
+    return typeof o.songTitle === 'string' && typeof o.artist === 'string';
+  }
+
   return (
     <main>
-      <div className="container mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <Header />
 
         <section className="grid gap-8 md:grid-cols-2 min-h-[calc(100vh-6rem)]">
-          {/* Left: input + visual preview (larger column) */}
-          <div className="md:col-span-2 flex flex-col gap-6">
+          {/* Left: input + visual preview */}
+          <div className="md:col-span-1 flex flex-col gap-6">
             <div>
               <InputArea onAnalyze={handleAnalyze} disabled={isLoading} onFile={(f) => { /* keep compatibility */ setSelectedFile(f); }} />
 
@@ -102,7 +113,6 @@ export default function SoundAnalyzerPage() {
           {/* Right: analysis output (sticky) */}
           <aside className="md:col-span-1">
             <div className="sticky top-20">
-              <h4 className="mb-2 text-sm font-semibold">Analysis output</h4>
               {isLoading && <LoadingSpinner />}
 
               {analysis && !isLoading && <AnalysisDisplay analysis={analysis} />}

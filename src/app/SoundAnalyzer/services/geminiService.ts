@@ -2,7 +2,7 @@ import type { AnalysisResult } from "../types";
 
 const API_KEY = process.env.GENAI_API_KEY ?? process.env.API_KEY ?? undefined;
 
-let ai: any = null;
+let ai: unknown = null;
 
 // Use a plain JSON schema object (avoid referencing SDK-specific Type constants so
 // this module can be typechecked even if the genai SDK isn't installed).
@@ -60,13 +60,13 @@ export const analyzeMusic = async (inputType: 'file' | 'link', value: string): P
     // isn't installed, fall back to the mock result to keep the UI functional.
     if (!ai) {
       try {
-        // Use eval + dynamic import to avoid TypeScript attempting to resolve the
-        // optional SDK at compile time. If the package isn't installed this
-        // will throw at runtime and we fall back to the mock result.
-        const mod = await eval("import('@google/genai')");
-        const GoogleGenAI = (mod as any).GoogleGenAI ?? (mod as any).default?.GoogleGenAI;
-        if (!GoogleGenAI) throw new Error('GoogleGenAI constructor not found in SDK');
-        ai = new GoogleGenAI({ apiKey: API_KEY });
+        // Dynamic import the optional SDK. If import fails we fall back to mock.
+        const mod = await import('@google/genai');
+        const maybe = (mod as unknown) as { GoogleGenAI?: unknown; default?: { GoogleGenAI?: unknown } };
+        const ctor = maybe.GoogleGenAI ?? maybe.default?.GoogleGenAI;
+        if (typeof ctor !== 'function') throw new Error('GoogleGenAI constructor not found in SDK');
+        // construct the client
+        ai = new (ctor as new (opts: { apiKey?: string }) => unknown)({ apiKey: API_KEY });
       } catch (err) {
         console.warn('GenAI SDK not available or failed to load, returning mock analysis.', err);
         await new Promise((r) => setTimeout(r, 400));
@@ -87,7 +87,18 @@ export const analyzeMusic = async (inputType: 'file' | 'link', value: string): P
       }
     }
 
-    const response = await ai.models.generateContent({
+    // call the SDK in a guarded way
+    const aiClient = ai as { models?: unknown } | null;
+    if (!aiClient || typeof aiClient !== 'object' || aiClient.models === undefined) {
+      throw new Error('AI client not initialized');
+    }
+    const models = aiClient.models as { generateContent?: unknown };
+    if (!models || typeof models.generateContent !== 'function') {
+      throw new Error('generateContent not available on AI client');
+    }
+
+    const generateFn = models.generateContent as (opts: unknown) => Promise<unknown>;
+    const response = await generateFn({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
@@ -98,17 +109,34 @@ export const analyzeMusic = async (inputType: 'file' | 'link', value: string): P
     });
 
     // The SDK may return text in different properties depending on version; try a few.
-    const raw = (response as any).text ?? (response as any).outputText ?? JSON.stringify(response);
-    const jsonText = String(raw).trim();
-    const parsedData = JSON.parse(jsonText);
-    return parsedData as AnalysisResult;
+    const raw = getResponseText(response);
+    const jsonText = raw.trim();
+    const parsed: unknown = JSON.parse(jsonText);
+    if (typeof parsed === 'object' && parsed !== null) return parsed as AnalysisResult;
+    throw new Error('Invalid JSON response from AI');
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     throw new Error('Failed to get analysis from AI service.');
   }
 };
 
-export const analyzeWithFeatures = async (features: any): Promise<AnalysisResult> => {
+function getResponseText(response: unknown): string {
+  if (response && typeof response === 'object') {
+    const r = response as Record<string, unknown>;
+    if (typeof r.text === 'string') return r.text;
+    if (typeof r.outputText === 'string') return r.outputText;
+  }
+  // If it's a primitive string already, return as-is. Otherwise JSON-stringify objects
+  if (typeof response === 'string') return response;
+  try {
+    return JSON.stringify(response ?? '');
+  } catch {
+    // If stringification fails, return an empty string — safer than default Object stringification
+    return '';
+  }
+}
+
+export const analyzeWithFeatures = async (features: Record<string, unknown>): Promise<AnalysisResult> => {
   // If no API key, return a mock result synthesizing from features
   if (!API_KEY) {
     await new Promise((r) => setTimeout(r, 400));
@@ -129,9 +157,11 @@ export const analyzeWithFeatures = async (features: any): Promise<AnalysisResult
 
   if (!ai) {
     try {
-      const mod = await eval("import('@google/genai')");
-      const GoogleGenAI = (mod as any).GoogleGenAI ?? (mod as any).default?.GoogleGenAI;
-      ai = new GoogleGenAI({ apiKey: API_KEY });
+      const mod = await import('@google/genai');
+      const maybe = (mod as unknown) as { GoogleGenAI?: unknown; default?: { GoogleGenAI?: unknown } };
+      const ctor = maybe.GoogleGenAI ?? maybe.default?.GoogleGenAI;
+      if (typeof ctor !== 'function') throw new Error('GoogleGenAI constructor not found in SDK');
+      ai = new (ctor as new (opts: { apiKey?: string }) => unknown)({ apiKey: API_KEY });
     } catch (err) {
       console.warn('GenAI SDK not available at runtime; returning mock analysis.', err);
       return analyzeWithFeatures(features); // will return mock because API_KEY present but SDK failed
@@ -141,15 +171,21 @@ export const analyzeWithFeatures = async (features: any): Promise<AnalysisResult
   const prompt = `You are a musicologist. Given the following extracted features from an audio file:\n${JSON.stringify(features, null, 2)}\n\nProduce a JSON object that conforms to the AnalysisResult schema: { songTitle, artist, genre, mood, instruments, tempoBPM, keySignature, timeSignature, rhythm, structure, overallVibe }. Respond with only valid JSON.`;
 
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: { responseMimeType: 'application/json', responseSchema: analysisSchema, temperature: 0.6 },
-    });
+    const aiClient = ai as { models?: unknown } | null;
+    if (!aiClient || typeof aiClient !== 'object' || aiClient.models === undefined) {
+      throw new Error('AI client not initialized');
+    }
+    const models = aiClient.models as { generateContent?: unknown };
+    if (!models || typeof models.generateContent !== 'function') {
+      throw new Error('generateContent not available on AI client');
+    }
+    const generateFn = models.generateContent as (opts: unknown) => Promise<unknown>;
+    const response = await generateFn({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', responseSchema: analysisSchema, temperature: 0.6 } });
 
-    const raw = (response as any).text ?? (response as any).outputText ?? JSON.stringify(response);
-    const parsed = JSON.parse(String(raw).trim());
-    return parsed as AnalysisResult;
+    const raw = getResponseText(response);
+    const parsed: unknown = JSON.parse(raw.trim());
+    if (typeof parsed === 'object' && parsed !== null) return parsed as AnalysisResult;
+    throw new Error('Invalid JSON response from AI');
   } catch (err) {
     console.error('analyzeWithFeatures error, returning mock', err);
     return analyzeWithFeatures(features);

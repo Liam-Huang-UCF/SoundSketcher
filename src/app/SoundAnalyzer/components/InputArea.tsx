@@ -60,8 +60,12 @@ export default function InputArea({ onFile, disabled, onAnalyze }: Props) {
     }
   }, [disabled, inputType, onAnalyze, selectedFile, onFile, linkValue]);
 
-  const isAnalyzeDisabled =
-    disabled || (inputType === "file" && !selectedFile) || (inputType === "link" && !linkValue.trim());
+  const isAnalyzeDisabled = (() => {
+    if (disabled) return true;
+    if (inputType === "file") return !selectedFile;
+    if (inputType === "link") return !linkValue.trim();
+    return false;
+  })();
 
   return (
     <div className="rounded-xl bg-white/3 p-6">

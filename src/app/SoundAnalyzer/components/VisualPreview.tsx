@@ -2,8 +2,18 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-// Wavesurfer may be loaded globally (e.g. via a script tag). Tell TS about it.
-declare const WaveSurfer: any;
+type WaveSurferInstance = {
+  destroy: () => void;
+  load: (url: string) => void;
+  on: (event: string, cb: (...args: unknown[]) => void) => void;
+  isPlaying?: () => boolean;
+  play?: () => void;
+  playPause?: () => void;
+};
+
+type WaveSurferCtor = {
+  create: (opts: Record<string, unknown>) => WaveSurferInstance;
+};
 
 type Props = {
   file?: File | null;
@@ -15,7 +25,7 @@ type Props = {
 
 export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const wavesurferRef = useRef<any>(null);
+  const wavesurferRef = useRef<WaveSurferInstance | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
@@ -41,7 +51,7 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
       if (wavesurferRef.current) {
         try {
           wavesurferRef.current.destroy();
-        } catch (e) {
+        } catch {
           // ignore
         }
         wavesurferRef.current = null;
@@ -50,10 +60,17 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
       setIsLoading(true);
 
       // Import the Wavesurfer constructor (we installed wavesurfer.js as dependency)
-      let WaveSurferCtor: any = null;
+      let WaveSurferCtor: WaveSurferCtor | null = null;
       try {
         const mod = await import("wavesurfer.js");
-        WaveSurferCtor = (mod as any).default ?? mod;
+        const maybeDefault = (mod as unknown) as { default?: unknown };
+        const candidate: unknown = maybeDefault.default ?? mod;
+        // ensure the module exposes a create function before treating it as a WaveSurferCtor
+        if (candidate && typeof ((candidate as Record<string, unknown>).create) === 'function') {
+          WaveSurferCtor = candidate as WaveSurferCtor;
+        } else {
+          throw new Error('Wavesurfer constructor not found');
+        }
       } catch (err) {
         console.warn("wavesurfer.js failed to load; falling back to static preview.", err);
         if (mounted) setIsLoading(false);
@@ -75,9 +92,9 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
         hideScrollbar: true,
       });
 
-      const fileUrl = URL.createObjectURL(file as Blob);
-      wavesurfer.load(fileUrl);
-      wavesurferRef.current = wavesurfer;
+  const fileUrl = URL.createObjectURL(file);
+  wavesurfer.load(fileUrl);
+  wavesurferRef.current = wavesurfer;
 
       wavesurfer.on("ready", () => {
         if (!mounted) return;
@@ -92,25 +109,31 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
       if (shouldPlay) {
         setTimeout(() => {
           if (!mounted) return;
-          if (!wavesurfer.isPlaying?.()) {
-            setAutoplayBlocked(true);
+          try {
+            if (typeof wavesurfer.isPlaying === 'function') {
+              if (!wavesurfer.isPlaying()) setAutoplayBlocked(true);
+            } else {
+              setAutoplayBlocked(true);
+            }
+          } catch {
+            // ignore
           }
         }, 600);
       }
     };
 
-    init();
+  void init();
 
     return () => {
       mounted = false;
       try {
         wavesurferRef.current?.destroy();
-      } catch (e) {
+      } catch {
         // ignore
       }
       wavesurferRef.current = null;
     };
-  }, [file, videoUrl]);
+  }, [file, videoUrl, shouldPlay]);
 
   // If parent requests playback (e.g. analysis completed), start playback when possible
   useEffect(() => {
@@ -120,25 +143,28 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
     try {
       // Attempt to play; browsers may block autoplay unless user interacted.
       if (typeof ws.play === "function") ws.play();
-    } catch (e) {
+    } catch {
       // ignore playback errors
     }
   }, [shouldPlay]);
 
   const handlePlayPause = () => {
-    wavesurferRef.current?.playPause();
+    const ws = wavesurferRef.current;
+    if (ws && typeof ws.playPause === "function") {
+      ws.playPause();
+    }
   };
 
   return (
     <div className="rounded-xl bg-white/3 p-6">
-      <h4 className="mb-3 text-sm font-semibold">Visual preview</h4>
+      <h4 className="mb-3 text-sm font-semibold">Preview Panel</h4>
 
       <div className="rounded-md bg-gradient-to-b from-white/5 to-white/3 p-3">
         {videoUrl ? (
           <div className="w-full">
             <iframe
               src={videoUrl}
-              title="YouTube preview"
+              title="YouTube Preview"
               className="w-full aspect-video rounded-md"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -191,8 +217,8 @@ export default function VisualPreview({ file, videoUrl, shouldPlay }: Props) {
       </div>
 
       <div className="mt-4 text-sm text-slate-300">
-        This pane shows a waveform preview. When a file is uploaded, an interactive
-        waveform appears with playback controls (requires WaveSurfer to be loaded).
+        This panel shows a preview of either the uploaded audio file or a YouTube video. When a file is uploaded, an interactive
+         waveform appears with playback controls. If a YouTube link is provided, the video is embedded instead.
       </div>
     </div>
   );
