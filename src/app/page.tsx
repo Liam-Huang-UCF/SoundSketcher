@@ -10,7 +10,7 @@ export default function Home() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#0f172a] via-[#1f2937] to-[#071128] text-white">
+    <main>
       <div className="container px-6 py-16">
         <header className="mx-auto max-w-4xl text-center">
           <h1 className="mb-4 text-5xl font-extrabold tracking-tight sm:text-6xl">
@@ -19,7 +19,7 @@ export default function Home() {
               {themeNote}
             </span>
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-slate-300">
+          <p className="mx-auto max-w-2xl text-lg text-slate-200">
             Upload audio or MIDI and instantly preview sheet music. Analyze
             rhythms, instruments, and tempo with an AI-powered breakdown — UI
             only (no API wired).

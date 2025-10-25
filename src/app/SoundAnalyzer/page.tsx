@@ -28,7 +28,7 @@ export default function SoundAnalyzerPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#021018] to-[#041026] text-white">
+    <main>
       <div className="container mx-auto px-6 py-12">
         <nav className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold">Sound Analyzer</h1>

@@ -59,7 +59,7 @@ export default function SheetSketcherPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#08121b] to-[#081524] text-white">
+    <main>
       <div className="container mx-auto px-6 py-12">
         <nav className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold">Sheet Sketcher</h1>
