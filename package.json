@@ -1,0 +1,40 @@
+{
+  "name": "soundsketch",
+  "version": "0.1.0",
+  "private": false,
+  "description": "SoundSketch — Next.js app for audio/score sketching",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": ["nextjs", "trpc", "typescript", "audio", "sound"],
+  "author": "Liam Huang",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "next": "^13.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@trpc/client": "^10.0.0",
+    "@trpc/server": "^10.0.0",
+    "@trpc/react-query": "^10.0.0",
+    "@trpc/next": "^10.0.0",
+    "zod": "^3.0.0",
+    "superjson": "^1.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "@types/react": "^18.2.21",
+    "@types/node": "^20.4.2",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "postcss": "^8.4.33",
+    "autoprefixer": "^10.4.14",
+    "tailwindcss": "^3.6.0"
+  }
+}
