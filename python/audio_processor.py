@@ -85,11 +85,11 @@ class AudioProcessor:
     def _load_audio_robust(self, audio_path: str, target_sr: int = 22050):
         """
         Load audio file with multiple fallback methods
-        Handles various audio formats and corrupted files
+        Uses pure Python libraries (no FFmpeg required)
         """
         audio_path_obj = Path(audio_path)
         
-        # Method 1: Try soundfile directly (best for WAV)
+        # Method 1: Try soundfile directly (best for WAV, FLAC)
         try:
             logger.info(f"Attempting to load audio with soundfile: {audio_path}")
             audio_data, sr = sf.read(audio_path)
@@ -104,47 +104,87 @@ class AudioProcessor:
         except Exception as e:
             logger.warning(f"soundfile failed: {e}")
         
-        # Method 2: Try pydub (good for MP3, M4A, etc.)
+        # Method 2: Try pydub with pure Python decoders
         try:
-            logger.info(f"Attempting to load audio with pydub: {audio_path}")
+            logger.info(f"Attempting to load audio with pydub (pure Python mode): {audio_path}")
             from pydub import AudioSegment
+            import io
             
-            # Determine format from extension
+            # Try to use pydub's built-in decoders (works for some formats)
             file_ext = audio_path_obj.suffix.lower().replace('.', '')
+            
+            # For MP3: try using audioread which supports pure Python MP3 decoding
             if file_ext == 'mp3':
-                audio = AudioSegment.from_mp3(audio_path)
-            elif file_ext == 'm4a':
-                audio = AudioSegment.from_file(audio_path, format='m4a')
-            elif file_ext in ['ogg', 'oga']:
-                audio = AudioSegment.from_ogg(audio_path)
-            elif file_ext == 'flac':
-                audio = AudioSegment.from_file(audio_path, format='flac')
+                try:
+                    import audioread
+                    with audioread.audio_open(audio_path) as f:
+                        sr_native = f.samplerate
+                        channels = f.channels
+                        # Read all frames
+                        frames = []
+                        for buf in f:
+                            frames.append(buf)
+                        
+                        # Convert to numpy
+                        audio_bytes = b''.join(frames)
+                        audio_data = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32)
+                        audio_data = audio_data / 32768.0  # Normalize
+                        
+                        # Convert stereo to mono
+                        if channels == 2:
+                            audio_data = audio_data.reshape(-1, 2).mean(axis=1)
+                        
+                        # Resample if needed
+                        if sr_native != target_sr:
+                            audio_data = librosa.resample(audio_data, orig_sr=sr_native, target_sr=target_sr)
+                        
+                        logger.info(f"Successfully loaded MP3 with audioread: {len(audio_data)} samples at {target_sr}Hz")
+                        return audio_data, target_sr
+                except ImportError:
+                    logger.warning("audioread not installed, cannot decode MP3 without FFmpeg")
+                    raise
             else:
+                # For other formats, pydub might work without FFmpeg for some formats
                 audio = AudioSegment.from_file(audio_path)
-            
-            # Convert to mono and target sample rate
-            audio = audio.set_channels(1)
-            audio = audio.set_frame_rate(target_sr)
-            
-            # Convert to numpy array
-            samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
-            # Normalize
-            samples = samples / (2**15)  # 16-bit audio
-            
-            logger.info(f"Successfully loaded audio with pydub: {len(samples)} samples at {target_sr}Hz")
-            return samples, target_sr
+                audio = audio.set_channels(1)
+                audio = audio.set_frame_rate(target_sr)
+                samples = np.array(audio.get_array_of_samples(), dtype=np.float32)
+                samples = samples / (2**15)
+                logger.info(f"Successfully loaded audio with pydub: {len(samples)} samples at {target_sr}Hz")
+                return samples, target_sr
+                
         except Exception as e:
             logger.warning(f"pydub failed: {e}")
         
-        # Method 3: Try librosa (last resort)
+        # Method 3: Try librosa with audioread backend
         try:
             logger.info(f"Attempting to load audio with librosa: {audio_path}")
             y, sr = librosa.load(audio_path, sr=target_sr, mono=True)
             logger.info(f"Successfully loaded audio with librosa: {len(y)} samples at {sr}Hz")
             return y, sr
         except Exception as e:
-            logger.error(f"All audio loading methods failed: {e}")
-            raise Exception(f"Could not load audio file: {audio_path}. Error: {str(e)}")
+            logger.error(f"All audio loading methods failed: {type(e).__name__}: {e}")
+            import traceback
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            
+            # Provide helpful error message
+            file_ext = audio_path_obj.suffix.lower()
+            if file_ext in ['.mp3', '.m4a', '.ogg']:
+                error_msg = f"Could not decode {file_ext} file. This app works best with WAV files.\n\n" \
+                            "To use MP3/M4A/OGG files, you have two options:\n\n" \
+                            "Option 1 (Recommended): Install FFmpeg\n" \
+                            "  - Windows: choco install ffmpeg\n" \
+                            "  - Mac: brew install ffmpeg\n" \
+                            "  - Linux: sudo apt-get install ffmpeg\n" \
+                            "  Then restart the Python server.\n\n" \
+                            "Option 2: Convert your audio to WAV format first\n" \
+                            "  - Use Audacity, VLC, or an online converter\n" \
+                            "  - WAV files work without any additional setup"
+            else:
+                error_msg = f"Unsupported audio format: {file_ext}\n" \
+                            "Please use WAV, FLAC, or convert to WAV format."
+            
+            raise Exception(f"Could not load audio file: {audio_path}.\n\n{error_msg}")
     
     def audio_to_midi(self, audio_path: str, output_dir: Path, stem_name: str) -> Path:
         """

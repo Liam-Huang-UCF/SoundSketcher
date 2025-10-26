@@ -174,5 +174,93 @@
     "errors": [
       ""
     ]
+  },
+  "55770286-c78c-43eb-831a-0a296bd283ec": {
+    "job_id": "55770286-c78c-43eb-831a-0a296bd283ec",
+    "status": "failed",
+    "filename": "Instrumental The White Stripes   Seven Nation Army.mp3",
+    "created_at": "2025-10-25T23:41:07.527447",
+    "completed_at": "2025-10-25T23:41:14.898430",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Could not load audio file: C:\\Code\\SoundSketch\\python\\uploads\\55770286-c78c-43eb-831a-0a296bd283ec.mp3. Error: "
+    ]
+  },
+  "95edd512-b80f-45eb-bb06-e11307089dbb": {
+    "job_id": "95edd512-b80f-45eb-bb06-e11307089dbb",
+    "status": "failed",
+    "filename": "Instrumental The White Stripes   Seven Nation Army.mp3",
+    "created_at": "2025-10-25T23:47:58.283174",
+    "completed_at": "2025-10-25T23:48:00.292728",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Could not load audio file: C:\\Code\\SoundSketch\\python\\uploads\\95edd512-b80f-45eb-bb06-e11307089dbb.mp3. Error: "
+    ]
+  },
+  "d6bf121d-159f-4d69-8e7f-5b823ff6c5c9": {
+    "job_id": "d6bf121d-159f-4d69-8e7f-5b823ff6c5c9",
+    "status": "failed",
+    "filename": "Instrumental The White Stripes   Seven Nation Army.mp3",
+    "created_at": "2025-10-25T23:52:27.785219",
+    "completed_at": "2025-10-25T23:52:29.762510",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Could not load audio file: C:\\Code\\SoundSketch\\python\\uploads\\d6bf121d-159f-4d69-8e7f-5b823ff6c5c9.mp3.\n\nFFmpeg is required for MP3/M4A/OGG files. Please install FFmpeg:\n  - Windows: choco install ffmpeg\n  - Mac: brew install ffmpeg\n  - Linux: sudo apt-get install ffmpeg\nThen restart your terminal and the Python server.\nAlternatively, convert your audio to WAV format."
+    ]
+  },
+  "466df974-9232-46a9-99b6-8c4564baffaa": {
+    "job_id": "466df974-9232-46a9-99b6-8c4564baffaa",
+    "status": "failed",
+    "filename": "Instrumental The White Stripes   Seven Nation Army.mp3",
+    "created_at": "2025-10-25T23:54:27.886662",
+    "completed_at": "2025-10-25T23:54:29.831474",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Could not load audio file: C:\\Code\\SoundSketch\\python\\uploads\\466df974-9232-46a9-99b6-8c4564baffaa.mp3.\n\nFFmpeg is required for MP3/M4A/OGG files. Please install FFmpeg:\n  - Windows: choco install ffmpeg\n  - Mac: brew install ffmpeg\n  - Linux: sudo apt-get install ffmpeg\nThen restart your terminal and the Python server.\nAlternatively, convert your audio to WAV format."
+    ]
+  },
+  "8ee85bab-e945-4d4a-a68d-47efe482dbbf": {
+    "job_id": "8ee85bab-e945-4d4a-a68d-47efe482dbbf",
+    "status": "completed",
+    "filename": "bob.mp3",
+    "created_at": "2025-10-26T00:02:14.623914",
+    "completed_at": "2025-10-26T00:02:43.591837",
+    "musicxml_files": [
+      {
+        "instrument": "audio",
+        "path": "C:\\Code\\SoundSketch\\python\\output\\8ee85bab-e945-4d4a-a68d-47efe482dbbf\\musicxml\\audio.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "audio",
+        "path": "C:\\Code\\SoundSketch\\python\\output\\8ee85bab-e945-4d4a-a68d-47efe482dbbf\\midi\\audio.mid"
+      }
+    ],
+    "errors": []
+  },
+  "e27b306c-090d-4bee-8ae5-f649cd3bf2fb": {
+    "job_id": "e27b306c-090d-4bee-8ae5-f649cd3bf2fb",
+    "status": "completed",
+    "filename": "bob2.mp3",
+    "created_at": "2025-10-26T00:08:56.273847",
+    "completed_at": "2025-10-26T00:09:53.500205",
+    "musicxml_files": [
+      {
+        "instrument": "audio",
+        "path": "C:\\Code\\SoundSketch\\python\\output\\e27b306c-090d-4bee-8ae5-f649cd3bf2fb\\musicxml\\audio.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "audio",
+        "path": "C:\\Code\\SoundSketch\\python\\output\\e27b306c-090d-4bee-8ae5-f649cd3bf2fb\\midi\\audio.mid"
+      }
+    ],
+    "errors": []
   }
 }
