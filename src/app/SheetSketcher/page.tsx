@@ -2,7 +2,6 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { env } from "~/env";
 
 type UploadedFile = {
   id: string;
@@ -29,7 +28,9 @@ export default function SheetSketcherPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const API_BASE = useMemo(() => env.NEXT_PUBLIC_PY_API_URL ?? "http://localhost:8000", []);
+  // Use NEXT_PUBLIC_* variable directly so this client component does not import
+  // a server-only module. Next.js replaces NEXT_PUBLIC_* at build time for client code.
+  const API_BASE = useMemo(() => process.env.NEXT_PUBLIC_PY_API_URL ?? "http://localhost:8000", []);
 
   const onFiles = useCallback((incoming: FileList | null) => {
     if (!incoming) return;
