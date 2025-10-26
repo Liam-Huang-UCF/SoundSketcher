@@ -67,46 +67,53 @@ export default function SheetSketcherPage() {
         const errText = await res.text();
         throw new Error(errText || `Upload failed with ${res.status}`);
       }
-      const data: { job_id: string; status: string; message: string } = await res.json();
+  const parsedData: unknown = await res.json();
+  if (typeof parsedData !== 'object' || parsedData === null) throw new Error('Invalid response from server');
+  const data = parsedData as { job_id: string; status: string; message: string };
 
       setSelectedId(f.id);
       setMessage(`Job started. Tracking status for ${f.name}...`);
 
       pollStatus(f.id, data.job_id);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setMessage(`Error: ${e.message ?? e}`);
+      const msg = e instanceof Error ? e.message : String(e);
+      setMessage(`Error: ${msg}`);
     }
   };
 
   const pollStatus = (clientFileId: string, jobId: string) => {
-    const interval = setInterval(async () => {
-      try {
-        const r = await fetch(`${API_BASE}/api/status/${jobId}`);
-        if (!r.ok) throw new Error(`Status ${r.status}`);
-        const js: JobStatus = await r.json();
+    const interval = setInterval(() => {
+      void (async () => {
+        try {
+          const r = await fetch(`${API_BASE}/api/status/${jobId}`);
+          if (!r.ok) throw new Error(`Status ${r.status}`);
+          const parsed: unknown = await r.json();
+          if (typeof parsed !== 'object' || parsed === null) throw new Error('Invalid status response');
+          const js = parsed as JobStatus;
 
-        setFiles((prev: UploadedFile[]) =>
-          prev.map((x: UploadedFile) => (x.id === clientFileId ? { ...x, job: js } : x)),
-        );
-
-        if (
-          js.status === "completed" ||
-          js.status === "completed_with_errors" ||
-          js.status === "failed"
-        ) {
-          clearInterval(interval);
-          setMessage(
-            js.status === "failed"
-              ? `Conversion failed: ${js.errors?.[0] ?? "Unknown error"}`
-              : js.status === "completed_with_errors"
-                ? `Completed with warnings. You can download the results.`
-                : `Conversion complete. You can download the results.`,
+          setFiles((prev: UploadedFile[]) =>
+            prev.map((x: UploadedFile) => (x.id === clientFileId ? { ...x, job: js } : x)),
           );
+
+          if (
+            js.status === "completed" ||
+            js.status === "completed_with_errors" ||
+            js.status === "failed"
+          ) {
+            clearInterval(interval);
+            setMessage(
+              js.status === "failed"
+                ? `Conversion failed: ${js.errors?.[0] ?? "Unknown error"}`
+                : js.status === "completed_with_errors"
+                  ? `Completed with warnings. You can download the results.`
+                  : `Conversion complete. You can download the results.`,
+            );
+          }
+        } catch (err: unknown) {
+          console.warn("Polling error", err);
         }
-      } catch (err) {
-        console.warn("Polling error", err);
-      }
+      })();
     }, 1500);
   };
 
