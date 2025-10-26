@@ -8,7 +8,7 @@ import MusicBackground from "./_components/MusicBackground";
 import Navbar from "./_components/Navbar";
 
 export const metadata: Metadata = {
-  title: "SoundSketch",
+  title: "SoundSketcher",
   description: "Generate Music Sheets and Analyze Sounds with AI",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

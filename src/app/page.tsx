@@ -10,7 +10,7 @@ export default function Home() {
       <div className="container px-6 py-16">
         <header className="mx-auto max-w-4xl text-center">
           <h1 className="mb-4 text-5xl font-extrabold tracking-tight sm:text-6xl">
-            SoundSketch
+            SoundSketcher
             <span className="ml-3 inline-block align-middle">
               <Image src="/logo.svg" alt="SoundSketch logo" width={48} height={48} priority={false} />
             </span>
