@@ -1,0 +1,22 @@
+# Core API Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Audio Processing
+librosa==0.10.1
+soundfile==0.12.1
+pydub==0.25.1
+
+# Music Analysis and Conversion
+music21==9.1.0
+pretty_midi==0.2.10
+mido==1.3.0
+
+# Utilities
+numpy==1.24.3
+scipy==1.11.4
+python-dotenv==1.0.0
+
+# CORS support for web integration
+fastapi-cors==0.0.6

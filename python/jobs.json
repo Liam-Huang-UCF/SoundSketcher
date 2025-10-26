@@ -1,0 +1,178 @@
+{
+  "120d8447-1f27-4e84-8758-a2787ad62105": {
+    "job_id": "120d8447-1f27-4e84-8758-a2787ad62105",
+    "status": "failed",
+    "filename": "Starboy.mp3",
+    "created_at": "2025-10-25T18:30:39.258949",
+    "completed_at": "2025-10-25T18:30:39.278245",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "[WinError 2] The system cannot find the file specified"
+    ]
+  },
+  "31d0c29c-91b3-4284-8045-a8baef0d10f2": {
+    "job_id": "31d0c29c-91b3-4284-8045-a8baef0d10f2",
+    "status": "failed",
+    "filename": "Starboy.mp3",
+    "created_at": "2025-10-25T18:39:31.447547",
+    "completed_at": "2025-10-25T18:40:01.947781",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Please install required dependencies: torch, torchaudio, demucs"
+    ]
+  },
+  "ab19641d-cbc6-4b97-a9d4-0c096c58a2e8": {
+    "job_id": "ab19641d-cbc6-4b97-a9d4-0c096c58a2e8",
+    "status": "failed",
+    "filename": "Starboy.mp3",
+    "created_at": "2025-10-25T18:41:06.001106",
+    "completed_at": "2025-10-25T18:41:10.947103",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      "Source separation failed: Could not load libtorchcodec. Likely causes:\n          1. FFmpeg is not properly installed in your environment. We support\n             versions 4, 5, 6 and 7.\n          2. The PyTorch version (2.9.0+cpu) is not compatible with\n             this version of TorchCodec. Refer to the version compatibility\n             table:\n             https://github.com/pytorch/torchcodec?tab=readme-ov-file#installing-torchcodec.\n          3. Another runtime dependency; see exceptions below.\n        The following exceptions were raised as we tried to load libtorchcodec:\n        \n[start of libtorchcodec loading traceback]\nFFmpeg version 8: Could not load this library: C:\\Users\\olito\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\torchcodec\\libtorchcodec_core8.dll\nFFmpeg version 7: Could not load this library: C:\\Users\\olito\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\torchcodec\\libtorchcodec_core7.dll\nFFmpeg version 6: Could not load this library: C:\\Users\\olito\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\torchcodec\\libtorchcodec_core6.dll\nFFmpeg version 5: Could not load this library: C:\\Users\\olito\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\torchcodec\\libtorchcodec_core5.dll\nFFmpeg version 4: Could not load this library: C:\\Users\\olito\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages\\torchcodec\\libtorchcodec_core4.dll\n[end of libtorchcodec loading traceback]."
+    ]
+  },
+  "d7e31e9d-f75e-4b2a-920c-7bc42d6293ad": {
+    "job_id": "d7e31e9d-f75e-4b2a-920c-7bc42d6293ad",
+    "status": "completed",
+    "filename": "Starboy.mp3",
+    "created_at": "2025-10-25T18:46:18.473820",
+    "completed_at": "2025-10-25T18:51:23.251609",
+    "musicxml_files": [
+      {
+        "instrument": "drums",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\musicxml\\drums.musicxml"
+      },
+      {
+        "instrument": "bass",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\musicxml\\bass.musicxml"
+      },
+      {
+        "instrument": "other",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\musicxml\\other.musicxml"
+      },
+      {
+        "instrument": "vocals",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\musicxml\\vocals.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "drums",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\midi\\drums.mid"
+      },
+      {
+        "instrument": "bass",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\midi\\bass.mid"
+      },
+      {
+        "instrument": "other",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\midi\\other.mid"
+      },
+      {
+        "instrument": "vocals",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\d7e31e9d-f75e-4b2a-920c-7bc42d6293ad\\midi\\vocals.mid"
+      }
+    ],
+    "errors": []
+  },
+  "c3ae1787-4191-446f-b40d-c77203ef6fa2": {
+    "job_id": "c3ae1787-4191-446f-b40d-c77203ef6fa2",
+    "status": "completed",
+    "filename": "Beethoven - F\u00fcr Elise.mp3",
+    "created_at": "2025-10-25T19:00:35.510299",
+    "completed_at": "2025-10-25T19:03:15.720366",
+    "musicxml_files": [
+      {
+        "instrument": "drums",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\musicxml\\drums.musicxml"
+      },
+      {
+        "instrument": "bass",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\musicxml\\bass.musicxml"
+      },
+      {
+        "instrument": "other",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\musicxml\\other.musicxml"
+      },
+      {
+        "instrument": "vocals",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\musicxml\\vocals.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "drums",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\midi\\drums.mid"
+      },
+      {
+        "instrument": "bass",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\midi\\bass.mid"
+      },
+      {
+        "instrument": "other",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\midi\\other.mid"
+      },
+      {
+        "instrument": "vocals",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\c3ae1787-4191-446f-b40d-c77203ef6fa2\\midi\\vocals.mid"
+      }
+    ],
+    "errors": []
+  },
+  "93a5f5e5-1eb4-4df7-9452-986cb82c2858": {
+    "job_id": "93a5f5e5-1eb4-4df7-9452-986cb82c2858",
+    "status": "completed",
+    "filename": "Beethoven - F\u00fcr Elise.mp3",
+    "created_at": "2025-10-25T19:18:17.837551",
+    "completed_at": "2025-10-25T19:20:49.773447",
+    "musicxml_files": [
+      {
+        "instrument": "audio",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\93a5f5e5-1eb4-4df7-9452-986cb82c2858\\musicxml\\audio.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "audio",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\93a5f5e5-1eb4-4df7-9452-986cb82c2858\\midi\\audio.mid"
+      }
+    ],
+    "errors": []
+  },
+  "a13981f9-da47-4fd6-8fdd-f26883a2c9dc": {
+    "job_id": "a13981f9-da47-4fd6-8fdd-f26883a2c9dc",
+    "status": "completed",
+    "filename": "Beethoven - F\u00fcr Elise.mp3",
+    "created_at": "2025-10-25T19:31:55.359382",
+    "completed_at": "2025-10-25T19:33:38.038940",
+    "musicxml_files": [
+      {
+        "instrument": "audio",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\a13981f9-da47-4fd6-8fdd-f26883a2c9dc\\musicxml\\audio.musicxml"
+      }
+    ],
+    "midi_files": [
+      {
+        "instrument": "audio",
+        "path": "c:\\Code\\SoundSketch\\python\\output\\a13981f9-da47-4fd6-8fdd-f26883a2c9dc\\midi\\audio.mid"
+      }
+    ],
+    "errors": []
+  },
+  "319a76b4-9e47-4dc2-8044-43308de603de": {
+    "job_id": "319a76b4-9e47-4dc2-8044-43308de603de",
+    "status": "failed",
+    "filename": "Instrumental The White Stripes   Seven Nation Army.mp3",
+    "created_at": "2025-10-25T19:55:30.329336",
+    "completed_at": "2025-10-25T19:55:33.960671",
+    "musicxml_files": [],
+    "midi_files": [],
+    "errors": [
+      ""
+    ]
+  }
+}
