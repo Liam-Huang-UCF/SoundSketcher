@@ -81,7 +81,9 @@ export async function POST(request: Request) {
       const analysis = await analyzeWithFeatures({ ...(out as Record<string, unknown> | undefined), filename: path.basename(dest) });
       return NextResponse.json(analysis);
     } else {
-      const analysis = await analyzeWithFeatures({ filename: path.basename(dest) });
+      // No python extractor found. Attempt a Node-based lightweight extraction
+      const nodeFeatures = await nodeExtractFeatures(dest, filename);
+      const analysis = await analyzeWithFeatures({ ...nodeFeatures, filename: path.basename(dest) });
       return NextResponse.json(analysis);
     }
   } catch (err) {
@@ -116,4 +118,71 @@ function runPythonScript(script: string, filePath: string): Promise<Record<strin
     });
     py.on('error', (err: unknown) => resolve({ error: String(err) }));
   });
+}
+
+async function nodeExtractFeatures(filePath: string, filename: string): Promise<Record<string, unknown>> {
+  const features: Record<string, unknown> = {};
+  try {
+    const ext = path.extname(filename).toLowerCase();
+    features.filename = filename;
+    features.sizeBytes = (await fs.promises.stat(filePath)).size;
+
+    // Try to use music-metadata for audio files (mp3, wav, m4a, etc.) if available
+    try {
+      // dynamic import so projects without the dependency don't crash
+  // Use @ts-expect-error because the dependency is optional and may not be installed
+  // @ts-expect-error -- optional dependency 'music-metadata' may be missing in some environments
+  const mmModule: unknown = await import('music-metadata');
+      const parseFn = (mmModule as { parseFile?: (p: string, opt?: unknown) => Promise<unknown> }).parseFile;
+      if (typeof parseFn === 'function') {
+        try {
+          const metaRaw = await parseFn(filePath, { duration: true });
+          if (metaRaw && typeof metaRaw === 'object') {
+            const meta = metaRaw as Record<string, unknown>;
+            const format = meta.format as Record<string, unknown> | undefined;
+            if (format) {
+              const dur = format.duration;
+              if (typeof dur === 'number') features.duration = Math.round(dur);
+              if (typeof format.bitrate === 'number') features.bitrate = format.bitrate;
+              if (typeof format.sampleRate === 'number') features.sampleRate = format.sampleRate;
+            }
+            const common = meta.common as Record<string, unknown> | undefined;
+            if (common) {
+              if (typeof common.title === 'string') features.title = common.title;
+              if (typeof common.artist === 'string') features.artist = common.artist;
+              if (Array.isArray(common.genre)) features.genre = common.genre;
+            }
+            features.type = 'audio';
+          }
+        } catch {
+          // ignore parsing errors from music-metadata
+        }
+      }
+    } catch {
+      // music-metadata not installed; continue with simple heuristics
+    }
+
+    // For XML (musicxml), read a small prefix of the file and try to extract a title
+    if (ext === '.xml' || ext === '.musicxml') {
+      try {
+        const txt = await fs.promises.readFile(filePath, { encoding: 'utf8' });
+        const re = /<movement-title>([^<]+)<\/movement-title>|<work-title>([^<]+)<\/work-title>|<title>([^<]+)<\/title>/i;
+        const titleMatch = re.exec(txt);
+        if (titleMatch) {
+          features.title = features.title ?? (titleMatch[1] ?? titleMatch[2] ?? titleMatch[3]);
+        }
+        features.type = 'musicxml';
+      } catch {
+        // ignore
+      }
+    }
+
+    // MIDI heuristic: set type and keep filename/size; parsing MIDI requires extra deps
+    if (ext === '.mid' || ext === '.midi') {
+      features.type = 'midi';
+    }
+  } catch {
+    // In case of any failure, return minimal features
+  }
+  return features;
 }
