@@ -17,8 +17,7 @@ export default function Home() {
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-slate-200">
             Upload audio or MIDI and instantly preview sheet music. Analyze
-            rhythms, instruments, and tempo with an AI-powered breakdown — UI
-            only (no API wired).
+            rhythms, instruments, and tempo with an AI-powered breakdown.
           </p>
         </header>
 
@@ -40,7 +39,7 @@ export default function Home() {
             </div>
             <p className="text-sm text-slate-400">
               Drag & drop a file, then preview the generated score and
-              download a printable PDF (placeholder UI).
+              download a printable PDF.
             </p>
             <div className="mt-2 text-xs text-slate-500">Go →</div>
           </Link>
@@ -53,8 +52,7 @@ export default function Home() {
               <div>
                 <h2 className="text-2xl font-semibold">Sound Analyzer</h2>
                 <p className="mt-1 text-sm text-slate-300">
-                  Upload audio clips to get a breakdown of tempo, instruments,
-                  and rhythms.
+                  Upload audio clips or YouTube links to get a musical breakdown.
                 </p>
               </div>
               <div className="rounded-full bg-[hsl(200,100%,60%)]/20 p-3 text-[hsl(200,100%,60%)]">
@@ -62,22 +60,21 @@ export default function Home() {
               </div>
             </div>
             <p className="text-sm text-slate-400">
-              Visual waveform, tempo estimate, and instrument guesses (mock
-              UI).
+              Visual waveform, tempo estimate, and instrument breakdown, etc.
             </p>
             <div className="mt-2 text-xs text-slate-500">Explore →</div>
           </Link>
         </section>
 
         <section className="mt-12 mx-auto max-w-3xl rounded-2xl bg-white/3 p-6 text-slate-200">
-          <h3 className="mb-3 text-xl font-semibold">How it works (UI-only)</h3>
+          <h3 className="mb-3 text-xl font-semibold">How it works</h3>
           <ol className="ml-4 list-decimal text-sm text-slate-300">
             <li className="mb-1">Upload a MIDI or audio file.</li>
             <li className="mb-1">
-              The app will prepare the file and send it to an API (placeholder).
+              The app will prepare the file and send it to an API.
             </li>
             <li className="mb-1">
-              You receive sheet music or an analysis report (mock preview here).
+              You receive sheet music or an analysis report.
             </li>
           </ol>
         </section>
