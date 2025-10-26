@@ -126,7 +126,7 @@ export default function SheetSketcherPage() {
 
   return (
     <main>
-      <div className="container mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <nav className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold">Sheet Sketcher</h1>
           <Link href="/" className="text-sm text-slate-300 hover:underline">
@@ -134,8 +134,9 @@ export default function SheetSketcherPage() {
           </Link>
         </nav>
 
-        <section className="grid gap-8 md:grid-cols-2">
-          <div>
+        <section className="grid gap-8 md:grid-cols-2 min-h-[calc(100vh-6rem)]">
+          {/* Left: upload + file list */}
+          <div className="md:col-span-1 flex flex-col gap-6">
             <div
               onDrop={onDrop}
               onDragOver={onDragOver}
@@ -224,54 +225,56 @@ export default function SheetSketcherPage() {
             </div>
           </div>
 
-          <aside className="rounded-xl bg-white/3 p-6">
-            <h3 className="mb-4 text-xl font-semibold">Score preview</h3>
-            {selectedId ? (
-              <div>
-                {(() => {
-                  const f = files.find((x) => x.id === selectedId);
-                  const jobId = f?.job?.job_id;
-                  const isReady = f?.job && (f.job.status === "completed" || f.job.status === "completed_with_errors");
-                  return isReady && jobId ? (
-                    <div className="space-y-3">
-                      <div className="rounded-md bg-gradient-to-b from-white/5 to-white/3 p-4 text-slate-100">
-                        <p className="text-sm">
-                          MusicXML is ready. For best results, open in MuseScore, Finale, or Dorico.
-                        </p>
+          {/* Right: preview (sticky) */}
+          <aside className="md:col-span-1">
+            <div className="sticky top-20 rounded-xl bg-white/3 p-6">
+              <h3 className="mb-4 text-xl font-semibold">Score preview</h3>
+              {selectedId ? (
+                <div>
+                  {(() => {
+                    const f = files.find((x) => x.id === selectedId);
+                    const jobId = f?.job?.job_id;
+                    const isReady = f?.job && (f.job.status === "completed" || f.job.status === "completed_with_errors");
+                    return isReady && jobId ? (
+                      <div className="space-y-3">
+                        <div className="rounded-md bg-gradient-to-b from-white/5 to-white/3 p-4 text-slate-100">
+                          <p className="text-sm">
+                            MusicXML is ready. For best results, open in MuseScore, Finale, or Dorico.
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href={downloadUrl(jobId, "musicxml")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-full bg-white/5 px-3 py-1 text-sm transition hover:bg-white/10"
+                          >
+                            Open MusicXML
+                          </a>
+                          <a
+                            href={downloadUrl(jobId, "midi")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-full bg-white/5 px-3 py-1 text-sm transition hover:bg-white/10"
+                          >
+                            Download MIDI
+                          </a>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <a
-                          href={downloadUrl(jobId, "musicxml")}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-full bg-white/5 px-3 py-1 text-sm transition hover:bg-white/10"
-                        >
-                          Open MusicXML
-                        </a>
-                        <a
-                          href={downloadUrl(jobId, "midi")}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-full bg-white/5 px-3 py-1 text-sm transition hover:bg-white/10"
-                        >
-                          Download MIDI
-                        </a>
+                    ) : (
+                      <div className="text-sm text-slate-200">
+                        {f?.job ? `Status: ${f.job.status}. The score will be available here when ready.` : "Select a file and click Generate to start conversion."}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="text-sm text-slate-200">
-                      {f?.job ? `Status: ${f.job.status}. The score will be available here when ready.` : "Select a file and click Generate to start conversion."}
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="text-center text-slate-300">
+                  No preview yet — upload a file and click Generate.
+                </div>
+              )}
               </div>
-            ) : (
-              <div className="text-center text-slate-300">
-                No preview yet — upload a file and click Generate.
-              </div>
-            )}
-
-            {message && <div className="mt-4 text-sm text-slate-200">{message}</div>}
+              {message && <div className="mt-4 text-sm text-slate-200">{message}</div>}
           </aside>
         </section>
       </div>
