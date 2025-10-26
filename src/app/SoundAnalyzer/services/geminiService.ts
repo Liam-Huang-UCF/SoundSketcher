@@ -26,27 +26,60 @@ const analysisSchema = {
     'tempoBPM', 'keySignature', 'timeSignature', 'rhythm', 'structure', 'overallVibe'
   ],
 };
+
+async function getLinkMetadata(url: string): Promise<{ title?: string; author?: string; provider?: string } | null> {
+  try {
+    // Try YouTube/Vimeo oEmbed which provides reliable title/author metadata
+    const oembedUrls = [
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+      `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
+    ];
+    for (const u of oembedUrls) {
+      try {
+        const res = await fetch(u);
+        if (!res.ok) continue;
+        const json: unknown = await res.json();
+        if (json && typeof json === 'object') {
+          const obj = json as Record<string, unknown>;
+          const title = typeof obj.title === 'string' ? obj.title : '';
+          const author = typeof obj.author_name === 'string' ? obj.author_name : (typeof obj.author === 'string' ? obj.author : '');
+          const provider = typeof obj.provider_name === 'string' ? obj.provider_name : '';
+          return { title, author, provider };
+        }
+        // if shape unexpected, try next
+      } catch {
+        // ignore and try next
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 export const analyzeMusic = async (inputType: 'file' | 'link', value: string): Promise<AnalysisResult> => {
+  // Try to enrich prompt with link metadata when available to reduce hallucinations
+  const meta = inputType === 'link' ? await getLinkMetadata(value) : null;
+  const metadataNote = meta ? `\nLink metadata: Title: ${meta.title ?? 'N/A'}, Author: ${meta.author ?? 'N/A'}, Provider: ${meta.provider ?? 'N/A'}` : '';
+
   const prompt = `You are a world-class musicologist and audio analyst. A user has provided a music source, it can either be a 
   mp3, .wav, xml, midi file or a YouTube link. Based on this source, provide a comprehensive analysis.
 
-  
   Source Type: ${inputType}
-  Source Value: "${value}"
-  
+  Source Value: "${value}"${metadataNote}
+
   Generate a detailed musical analysis. Your response MUST be a single, valid JSON object that strictly adheres to the provided schema. Do not include any markdown formatting, code block syntax, or any text outside of the JSON object.
-  If the source is a filename, infer the artist and title from it. If it's a link, use the information from the link. Make educated guesses if necessary. Please make sure that the information is as accurate as possible based on the provided source.
+  If the source is a filename, infer the artist and title from it. If it's a link, use the information from the link and the provided link metadata when available. Make educated guesses if necessary. Please make sure that the information is as accurate as possible based on the provided source.
   Please make sure that the JSON object includes the following fields: songTitle, artist, genre, mood, instruments, tempoBPM, keySignature, timeSignature, rhythm, structure, overallVibe.
   `;
-  
+
   try {
     if (!API_KEY) {
       // No API key configured — return a plausible mock analysis so the UI can work during dev.
       await new Promise((r) => setTimeout(r, 800));
-      const titleGuess = inputType === 'file' ? value.replace(/\.[^.]+$/, '') : 'Unknown Title';
+      const titleGuess = inputType === 'file' ? value.replace(/\.[^.]+$/, '') : meta?.title ?? 'Unknown Title';
       return {
         songTitle: String(titleGuess),
-        artist: 'Unknown',
+        artist: meta?.author ?? 'Unknown',
         genre: 'Ambient',
         mood: ['Calm', 'Reflective'],
         instruments: ['Piano', 'Pad'],
@@ -73,10 +106,10 @@ export const analyzeMusic = async (inputType: 'file' | 'link', value: string): P
       } catch (err) {
         console.warn('GenAI SDK not available or failed to load, returning mock analysis.', err);
         await new Promise((r) => setTimeout(r, 400));
-        const titleGuess = inputType === 'file' ? value.replace(/\.[^.]+$/, '') : 'Unknown Title';
+        const titleGuess = inputType === 'file' ? value.replace(/\.[^.]+$/, '') : meta?.title ?? 'Unknown Title';
         return {
           songTitle: String(titleGuess),
-          artist: 'Unknown',
+          artist: meta?.author ?? 'Unknown',
           genre: 'Ambient',
           mood: ['Calm', 'Reflective'],
           instruments: ['Piano', 'Pad'],
