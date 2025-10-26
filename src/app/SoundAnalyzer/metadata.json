@@ -1,5 +1,5 @@
 
 {
   "name": "Music Analysis Agent",
-  "description": "An intelligent agent that analyzes music files or links (YouTube/Spotify) to provide a detailed breakdown of musical elements like instruments, tempo, mood, and rhythm using AI."
+  "description": "An intelligent agent that analyzes music (mp3, .wav, xml, or MIDI) files or YouTube links to provide a detailed breakdown of musical elements like instruments, tempo, mood, and rhythm using AI."
 }

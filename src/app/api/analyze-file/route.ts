@@ -22,11 +22,14 @@ export async function POST(request: Request) {
   let filename = 'upload';
   let fileBuffer: Buffer | null = null;
 
-  // uploaded may be a File (browser/File API) when sent from the client form
-  if (uploaded instanceof File) {
-    const ab = await uploaded.arrayBuffer();
+  // uploaded may be a File/Blob-like object. In Next.js server route formData the
+  // object usually has an arrayBuffer() method. Guard for that rather than using
+  // `instanceof File` which may be false in the server runtime.
+  if (uploaded && typeof (uploaded as { arrayBuffer?: unknown }).arrayBuffer === 'function') {
+    const ab = await (uploaded as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer();
     fileBuffer = Buffer.from(ab);
-    filename = uploaded.name ?? filename;
+    // some implementations provide a `name` property for the uploaded file
+    filename = (uploaded as { name?: string }).name ?? filename;
   }
 
   if (!fileBuffer) {

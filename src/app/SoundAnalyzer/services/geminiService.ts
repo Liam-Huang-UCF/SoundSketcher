@@ -27,13 +27,16 @@ const analysisSchema = {
   ],
 };
 export const analyzeMusic = async (inputType: 'file' | 'link', value: string): Promise<AnalysisResult> => {
-  const prompt = `You are a world-class musicologist and audio analyst. A user has provided a music source. Based on this source, provide a comprehensive analysis.
+  const prompt = `You are a world-class musicologist and audio analyst. A user has provided a music source, it can either be a 
+  mp3, .wav, xml, midi file or a YouTube link. Based on this source, provide a comprehensive analysis.
+
   
   Source Type: ${inputType}
   Source Value: "${value}"
   
   Generate a detailed musical analysis. Your response MUST be a single, valid JSON object that strictly adheres to the provided schema. Do not include any markdown formatting, code block syntax, or any text outside of the JSON object.
-  If the source is a filename, infer the artist and title from it. If it's a link, use the information from the link. Make educated guesses if necessary.
+  If the source is a filename, infer the artist and title from it. If it's a link, use the information from the link. Make educated guesses if necessary. Please make sure that the information is as accurate as possible based on the provided source.
+  Please make sure that the JSON object includes the following fields: songTitle, artist, genre, mood, instruments, tempoBPM, keySignature, timeSignature, rhythm, structure, overallVibe.
   `;
   
   try {
