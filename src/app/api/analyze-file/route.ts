@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { spawn } from "child_process";
+import { spawn, spawnSync } from "child_process";
+
+// Maximum allowed upload size (bytes). Can be overridden via env var.
+const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 10 * 1024 * 1024); // 10MB default
 import { analyzeWithFeatures } from "../../SoundAnalyzer/services/geminiService";
 
 export const runtime = "nodejs";
@@ -36,6 +39,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Uploaded file not supported' }, { status: 400 });
   }
 
+  // Log size for debugging and enforce a server-side limit to avoid OOM or platform limits
+  console.log(`/api/analyze-file received upload: filename=${filename}, size=${fileBuffer.length} bytes`);
+  if (fileBuffer.length > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: `Uploaded file is too large (${fileBuffer.length} bytes). Maximum allowed is ${MAX_UPLOAD_BYTES} bytes.` }, { status: 413 });
+  }
+
   const safeName = path.basename(filename);
   const dest = path.join(tmpDir, safeName);
   try {
@@ -47,6 +56,23 @@ export async function POST(request: Request) {
   try {
     const scriptPath = path.join(process.cwd(), 'scripts', 'extract_features.py');
     if (fs.existsSync(scriptPath)) {
+      // Check whether a python binary is available before attempting to spawn.
+      let pythonAvailable = true;
+      try {
+        const probe = spawnSync('python', ['--version']);
+        if (probe.error || probe.status !== 0) {
+          pythonAvailable = false;
+        }
+      } catch {
+        pythonAvailable = false;
+      }
+
+      if (!pythonAvailable) {
+        console.warn('Python not available in PATH; skipping feature extractor.');
+        const analysis = await analyzeWithFeatures({ error: 'python-not-found', filename: path.basename(dest) });
+        return NextResponse.json(analysis);
+      }
+
       const out = await runPythonScript(scriptPath, dest);
       const outObj = out as Record<string, unknown> | undefined;
       if (outObj && typeof outObj.error === 'string') {
